@@ -1,12 +1,13 @@
 import type { AuditEvent, AuditEventType } from "../types/audit";
-
-const STORAGE_KEY = "audit_logs";
+import { appendLog, isSubmitted } from "../services/logService";
 
 export function useAuditLogger(attemptId: string) {
   const logEvent = (
     eventType: AuditEventType,
     metadata: Record<string, any> = {}
   ) => {
+    if (isSubmitted()) return;
+
     const event: AuditEvent = {
       id: crypto.randomUUID(),
       eventType,
@@ -15,17 +16,9 @@ export function useAuditLogger(attemptId: string) {
       metadata
     };
 
-    const existing =
-      JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]") as AuditEvent[];
-
-    existing.push(event);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
+    console.log("[Audit] Logging event:", eventType, metadata);
+    appendLog(event);
   };
 
-  const getLogs = () =>
-    JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]") as AuditEvent[];
-
-  const clearLogs = () => localStorage.removeItem(STORAGE_KEY);
-
-  return { logEvent, getLogs, clearLogs };
+  return { logEvent };
 }
