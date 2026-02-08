@@ -1,35 +1,63 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import FullscreenGate from "./components/FullscreenGate";
+import WarningModal from "./components/WarningModal";
+import { MAX_VIOLATIONS } from "./config/constants";
+import { useAuditLogger } from "./hooks/useAuditLogger";
+import { useFocusBlocker } from "./hooks/useFocusBlocker";
+import { useClipboardBlocker } from "./hooks/useClipboardBlocker";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [violations, setViolations] = useState(0);
+  const [warningOpen, setWarningOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const [terminated, setTerminated] = useState(false);
+
+  const { logEvent } = useAuditLogger("ATTEMPT_001");
+
+  const handleViolation = (reason: string) => {
+    logEvent("VIOLATION", { reason });
+
+    setReason(reason);
+    setViolations(v => v + 1);
+    setWarningOpen(true);
+  };
+
+  const acknowledgeWarning = async () => {
+    setWarningOpen(false);
+
+    if (violations >= MAX_VIOLATIONS) {
+      logEvent("TEST_TERMINATED");
+      setTerminated(true);
+      return;
+    }
+
+    // Force fullscreen re-entry
+    if (!document.fullscreenElement) {
+      await document.documentElement.requestFullscreen();
+    }
+  };
+
+  useFocusBlocker(handleViolation);
+  useClipboardBlocker(handleViolation);
+
+  if (terminated) {
+    return <h1>❌ Test Terminated Due to Violations</h1>;
+  }
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+      <FullscreenGate onViolation={handleViolation} />
 
-export default App
+      <WarningModal
+        open={warningOpen}
+        reason={reason}
+        violations={violations}
+        maxViolations={MAX_VIOLATIONS}
+        onAcknowledge={acknowledgeWarning}
+      />
+
+      <h2>Assessment Content (Mock)</h2>
+      <p>This represents the test area.</p>
+    </>
+  );
+}
