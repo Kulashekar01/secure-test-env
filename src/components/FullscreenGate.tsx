@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuditLogger } from "../hooks/useAuditLogger";
 
 interface Props {
@@ -6,6 +6,10 @@ interface Props {
 }
 
 export default function FullscreenGate({ onViolation }: Props) {
+  const [isFullscreen, setIsFullscreen] = useState(
+    !!document.fullscreenElement,
+  );
+
   const { logEvent } = useAuditLogger("ATTEMPT_001");
 
   const requestFullscreen = async () => {
@@ -16,6 +20,7 @@ export default function FullscreenGate({ onViolation }: Props) {
   useEffect(() => {
     const handler = () => {
       const active = !!document.fullscreenElement;
+      setIsFullscreen(active);
       logEvent(active ? "FULLSCREEN_ENTERED" : "FULLSCREEN_EXITED");
 
       if (!active) {
@@ -24,11 +29,10 @@ export default function FullscreenGate({ onViolation }: Props) {
     };
 
     document.addEventListener("fullscreenchange", handler);
-    return () =>
-      document.removeEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
   }, []);
 
-  if (!document.fullscreenElement) {
+  if (!isFullscreen) {
     return (
       <div style={overlayStyle}>
         <h2>Fullscreen Required</h2>
@@ -49,5 +53,5 @@ const overlayStyle: React.CSSProperties = {
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-  zIndex: 9999
+  zIndex: 9999,
 };
