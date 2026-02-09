@@ -1,73 +1,151 @@
-# React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Currently, two official plugins are available:
+# 🔐 Secure Test Environment Enforcement (React)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 📌 Overview
 
-## React Compiler
+This project is a **React-based proof of concept** for a **secure assessment environment**.
+It enforces browser restrictions, blocks distracting actions, and maintains a **complete, auditable event trail** for employer review.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The focus is on **environment enforcement and audit logging**, not on building a full assessment platform.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🎯 Key Objectives
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+* Force fullscreen before test starts
+* Block restricted actions (tab switch, blur, copy/paste)
+* Warn users on violations
+* Terminate test after configurable violations
+* Capture and persist all events immutably
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+> Target browser: **Chrome**
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+---
+
+## ✅ Features Implemented
+
+### 1. Fullscreen Enforcement
+
+* Mandatory fullscreen before assessment access
+* Continuous monitoring of fullscreen state
+* Warning modal on fullscreen exit
+* Forced re-entry
+* Configurable exit tolerance
+
+**Events logged**
+
+* `FULLSCREEN_REQUESTED`
+* `FULLSCREEN_ENTERED`
+* `FULLSCREEN_EXITED`
+* `FULLSCREEN_RE_ENTERED`
+
+---
+
+### 2. Violation Handling
+
+Blocked & logged actions:
+
+* Fullscreen exit
+* Tab switch / window blur
+* Copy & paste attempts
+
+Each violation:
+
+* Shows a blocking warning modal
+* Increments violation count
+* Terminates test after threshold
+
+```ts
+MAX_VIOLATIONS = 3
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 3. Unified Audit Logging
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+All events follow a single schema:
+
+```ts
+{
+  eventType,
+  timestamp,
+  attemptId,
+  metadata
+}
 ```
+
+Captured events include:
+
+* Fullscreen lifecycle
+* Focus & visibility changes
+* Clipboard attempts
+* Violations
+* Test termination
+
+---
+
+### 4. Log Persistence & Immutability
+
+* Logs stored in `localStorage` (refresh & offline safe)
+* Logs sent in **batches** to backend
+* Final flush on test termination
+* Logging locked post-submission (immutable)
+
+---
+
+## 🌐 Backend (Mock API)
+
+Audit logs are sent to **MockAPI**.
+
+### `.env`
+
+```env
+VITE_AUDIT_API_URL=https://698700308bacd1d773ec42ad.mockapi.io/api/v1
+```
+
+### Endpoint
+
+```
+POST /auditLogs
+```
+
+---
+
+## ⚙️ Tech Stack
+
+* React + TypeScript
+* Vite
+* Browser APIs (Fullscreen, Visibility, Clipboard)
+* MockAPI
+* LocalStorage
+
+---
+
+## 🧠 Design Notes
+
+* Frontend-first by design (browser enforcement)
+* Blocking where browser security allows
+* System-level actions are logged + penalized, not force-disabled
+* Clean separation of enforcement, logging, and UI
+
+---
+
+## ▶️ Run Locally
+
+```bash
+npm install
+npm run dev
+```
+
+Open in **Chrome** and trigger violations to see enforcement and audit logs.
+
+
+
+---
+
+## ✅ Summary
+
+This PoC demonstrates a **secure, auditable test environment** with realistic browser enforcement, configurable tolerance, and immutable event logging — suitable for high-stakes assessments.
+
+---
