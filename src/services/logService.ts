@@ -54,7 +54,6 @@ export function isSubmitted(): boolean {
   return localStorage.getItem(SUBMITTED_KEY) === "true";
 }
 
-/** Call on app mount so each session can log (e.g. after refresh). */
 export function resetSubmitted() {
   localStorage.removeItem(SUBMITTED_KEY);
 }

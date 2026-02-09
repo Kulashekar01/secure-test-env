@@ -18,13 +18,13 @@ export default function WarningModal({
   return (
     <div style={backdrop}>
       <div style={modal}>
-        <h2>⚠️ Rule Violation Detected</h2>
+        <h2 style={{color:"2px solid red"}}>⚠️ Rule Violation Detected</h2>
 
-        <p>
+        <p style={{color:"2px solid red"}}>
           <strong>Reason:</strong> {reason}
         </p>
 
-        <p>
+        <p style={{color:"2px solid red"}}>
           Attempts remaining:{" "}
           <strong>{maxViolations - violations}</strong>
         </p>
@@ -48,7 +48,7 @@ const backdrop: React.CSSProperties = {
 };
 
 const modal: React.CSSProperties = {
-  background: "#fff",
+  background: "#5d5757",
   padding: "24px",
   borderRadius: "8px",
   width: "400px",

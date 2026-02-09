@@ -24,9 +24,13 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
+  min-height: 100vh;
+  /* Let the app control its own layout instead of centering the body */
+  display: block;
+}
+
+#root {
   min-height: 100vh;
 }
 

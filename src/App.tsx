@@ -16,7 +16,6 @@ export default function App() {
 
   const { logEvent } = useAuditLogger("ATTEMPT_001");
 
-  // 🔹 ALL hooks must be here (before any return)
   useLogBatcher(!terminated);
   useFocusBlocker(handleViolation);
   useClipboardBlocker(handleViolation);
@@ -60,11 +59,35 @@ export default function App() {
 
   // 🔹 conditional return comes LAST
   if (terminated) {
-    return <h1>❌ Test Terminated Due to Violations</h1>;
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+          padding: "1rem",
+        }}
+      >
+        <h1>❌ Test Terminated Due to Violations</h1>
+      </div>
+    );
   }
 
   return (
-    <>
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
+        padding: "1rem",
+      }}
+    >
       <FullscreenGate onViolation={handleViolation} />
 
       <WarningModal
@@ -77,6 +100,6 @@ export default function App() {
 
       <h2>Assessment Content (Mock)</h2>
       <p>This represents the test area.</p>
-    </>
+    </div>
   );
 }
